@@ -32,15 +32,24 @@ async function run() {
     await client.connect();
 
     // database connect 
-    const database = client.db('teachDb')
-    const userCollection = database.collection('teachers')
+    const teacherDb = client.db('teacheDb').collection('teachers')
+
+
+
+    // get teachers
+    app.get('/teachers', async(req, res) => {
+      const cursor = teacherDb.find()
+      const result = await cursor.toArray()
+      res.send(result)
+    })
 
 
     // post teachers 
-    app.post('/teachers', async (req, res) => {
-        const user = req.body;
-        const result = await userCollection.insertOne(user)
-        res.send(result)
+
+    app.post('/teachers', async(req, res) => {
+      const user = req.body;
+      const result = await teacherDb.insertOne(user)
+      res.send(result)
     })
 
     // Send a ping to confirm a successful connection
