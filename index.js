@@ -1,7 +1,7 @@
 const express = require('express');
 const app = express()
 const cors = require('cors');
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const port = process.env.PORT || 5000
 
 
@@ -37,19 +37,58 @@ async function run() {
 
 
     // get teachers
-    app.get('/teachers', async(req, res) => {
+
+    app.get('/teachers', async (req, res) => {
       const cursor = teacherDb.find()
       const result = await cursor.toArray()
       res.send(result)
     })
 
 
-    // post teachers 
+    // find single profile 
+    app.get('/teachers/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = {_id : new ObjectId(id)}
+      const result = await teacherDb.findOne(query)
 
+      res.send(result)
+    })
+
+
+    // post teachers 
     app.post('/teachers', async(req, res) => {
       const user = req.body;
       const result = await teacherDb.insertOne(user)
       res.send(result)
+    })
+
+
+
+    // update teacher profile 
+    app.put('/teachers/:id', async (req, res) => {
+      const id = req.params.id;
+      const {name, email} = req.body;
+      const filter = {_id : new ObjectId(id)}
+      const options = {upsert : true}
+      const updateDoc = {
+        $set : {
+          name,
+          email
+        }
+      }
+      console.log(updateDoc)
+
+      const result = await teacherDb.updateOne(filter, updateDoc, options)
+      res.send(result)
+    })
+
+
+    // delete teacher 
+    app.delete('/teachers/:id', async (req, res) => {
+        const id = req.params.id;
+        const query = {_id : new ObjectId(id)}
+        const result = await teacherDb.deleteOne(query)
+        res.send(result)
     })
 
     // Send a ping to confirm a successful connection
